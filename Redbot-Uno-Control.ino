@@ -27,6 +27,7 @@ const int buttonPin = 7;
 volatile int rightEncoderValue = 0;
 volatile int leftEncoderValue = 0;
 
+// unused variables meant for debugging
 volatile int upCnt = 0;
 volatile int dwnCnt = 0;
 
@@ -337,10 +338,8 @@ void rightEncoderISR() {
   rStateB = digitalRead(R_ENC_B);*/
 
   if (rStateA == rStateB) {
-    upCnt++;
     rightEncoderValue++;
   } else {
-    dwnCnt++;
     rightEncoderValue--;
   }
 }
