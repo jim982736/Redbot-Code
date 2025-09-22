@@ -13,6 +13,7 @@ RedBotMotors motors;
 // assign unique ID to gryo, seems like it needs to be named "gyro"
 Adafruit_L3GD20_Unified gyro = Adafruit_L3GD20_Unified(20);
 
+// variables for using the encoders
 RedBotEncoder encoder = RedBotEncoder(A2, 10);
 int buttonPin = 12;
 int countsPerRev = 192;  // 48:1 gearing, 4 ticks per revolution
@@ -23,8 +24,6 @@ float wheelDist = 5.0;             // approx. dist from center of redbot to cent
 
 const int servoPin = 9;
 Servo marker;
-
-int PIDController(double error, int propGain = 0, int integralGain = 0, int derGain = 0);
 
 struct PID {
   double integState;
@@ -199,37 +198,6 @@ void turnToAngleGyro(double angle) {
   motors.brake();
 }
 
-// Unused turning function based purely on encoders
-void turnToAngle(double angle, int motorPower) {
-  double overshoot = 20;                                                    // measured overshoot
-  double arcLength = ((angle - overshoot) / 360.0) * (wheelDist * 2 * PI);  // distance traveled by each wheel
-  double numRev = arcLength / wheelCirc;
-
-  long targetCount = numRev * countsPerRev;
-  long lCount = 0;
-  long rCount = 0;
-  int power = ((angle > 0) ? motorPower : (motorPower * -1));
-
-  encoder.clearEnc(BOTH);
-  marker.write(15);
-  delay(200);
-  motors.pivot(power);
-
-  Serial.print("Target: ");
-  Serial.println(targetCount);
-
-  while (AVERAGE(lCount, rCount) < targetCount) {
-    lCount = ABS(encoder.getTicks(LEFT));
-    rCount = ABS(encoder.getTicks(RIGHT));
-
-    Serial.print(lCount);
-    Serial.print("\t");
-    Serial.println(rCount);
-  }
-  motors.brake();
-  delay(200);
-}
-
 // drive straight a certain distance in cm
 void driveStraight(float distance, int motorPower) {
   delay(100);
@@ -330,4 +298,35 @@ void driveStraight(float distance, int motorPower) {
   }
   // now apply "brakes" to stop the motors.
   motors.brake();
+}
+
+// Unused turning function based purely on encoders
+void turnToAngle(double angle, int motorPower) {
+  double overshoot = 20;                                                    // measured overshoot
+  double arcLength = ((angle - overshoot) / 360.0) * (wheelDist * 2 * PI);  // distance traveled by each wheel
+  double numRev = arcLength / wheelCirc;
+
+  long targetCount = numRev * countsPerRev;
+  long lCount = 0;
+  long rCount = 0;
+  int power = ((angle > 0) ? motorPower : (motorPower * -1));
+
+  encoder.clearEnc(BOTH);
+  marker.write(15);
+  delay(200);
+  motors.pivot(power);
+
+  Serial.print("Target: ");
+  Serial.println(targetCount);
+
+  while (AVERAGE(lCount, rCount) < targetCount) {
+    lCount = ABS(encoder.getTicks(LEFT));
+    rCount = ABS(encoder.getTicks(RIGHT));
+
+    Serial.print(lCount);
+    Serial.print("\t");
+    Serial.println(rCount);
+  }
+  motors.brake();
+  delay(200);
 }
