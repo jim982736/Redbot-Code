@@ -13,7 +13,6 @@ RedBotMotors motors;
 // assign unique ID to gryo, seems like it needs to be named "gyro"
 Adafruit_L3GD20_Unified gyro = Adafruit_L3GD20_Unified(20);
 
-// variables for using the encoders
 RedBotEncoder encoder = RedBotEncoder(A2, 10);
 int buttonPin = 12;
 int countsPerRev = 192;  // 48:1 gearing, 4 ticks per revolution
@@ -89,8 +88,8 @@ void loop(void) {
     marker.write(28);
     delay(200);*/
 
-    // demo
-    turnToAngleGyro(60.0);
+    // Demo
+    /*turnToAngleGyro(60.0);
     turnToAngleGyro(-150.0);
     driveStraight(40.0, 100);
     turnToAngleGyro(120.0);
@@ -99,31 +98,20 @@ void loop(void) {
     driveStraight(40.0, 100);
     turnToAngleGyro(-120.0);
     driveStraight(20.0, 100);
-    turnToAngleGyro(-30.0);
+    turnToAngleGyro(-30.0);*/
 
-    // 180 turn
-    /*driveStraight(20, 100);
-    turnToAngle(180, 100);
-    driveStraight(20, 100);
-    turnToAngle(180, 100);*/
-
-    // Single Line
-    /*driveStraight(50, 100);
-    marker.write(15);*/
-
-    // multiple turns
-    /*turnToAngleGyro(90.0);
+    // Zigzag path demo
+    turnToAngleGyro(30.0);
+    driveStraight(15.0, 100);
     turnToAngleGyro(-120.0);
-    turnToAngleGyro(420.0);
-    turnToAngleGyro(-360.0)*/
-
-    // triangle
-    /*driveStraight(40, 100);
-    turnToAngleGyro(120.0);
-    driveStraight(40, 100);
-    turnToAngleGyro(120.0);
-    driveStraight(40, 100);
-    turnToAngleGyro(120.0);*/
+    driveStraight(15.0, 100);
+    turnToAngleGyro(150.0);
+    driveStraight(25.625, 100);
+    turnToAngleGyro(-130.0);
+    driveStraight(39.375, 100);
+    turnToAngleGyro(160.0);
+    driveStraight(45.0, 100);
+    turnToAngleGyro(-90.0);
   }
 }
 
