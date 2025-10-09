@@ -8,6 +8,11 @@
 #define AVERAGE(a, b) ((a + b) / 2)
 #define ABS(n) ((n < 0) ? n * -1 : n)
 
+// for use with driveStraight, generally use SLOW for shorter
+// distances (< 20cm) and FAST for longer distances
+#define SLOW 40
+#define FAST 100
+
 RedBotMotors motors;
 
 // assign unique ID to gryo, seems like it needs to be named "gyro"
@@ -64,6 +69,8 @@ int updatePID(PID* pid, double error, double dist) {
   return prop + integ + der;
 }
 
+void driveStraight(float distance, int motorPower, bool draw = true, bool reverse = false);
+
 void setup() {
   pinMode(buttonPin, INPUT_PULLUP);
   marker.write(0);
@@ -102,16 +109,23 @@ void loop(void) {
 
     // Zigzag path demo
     turnToAngleGyro(30.0);
-    driveStraight(15.0, 100);
+    driveStraight(15.0, FAST);
     turnToAngleGyro(-120.0);
-    driveStraight(15.0, 100);
-    turnToAngleGyro(150.0);
-    driveStraight(25.625, 100);
+    driveStraight(3.25, SLOW, false);
+    driveStraight(21.5, FAST);
+    driveStraight(9.75, SLOW, false, true)
+      turnToAngleGyro(90.0);
+    /*turnToAngleGyro(150.0);
+    driveStraight(25.625, FAST);
     turnToAngleGyro(-130.0);
-    driveStraight(39.375, 100);
-    turnToAngleGyro(160.0);
-    driveStraight(45.0, 100);
-    turnToAngleGyro(-90.0);
+    driveStraight(39.375, FAST);
+    turnToAngleGyro(70.0);*/
+
+    /*driveStraight(45.0, 100);
+    turnToAngleGyro(-90.0);*/
+
+    /*driveStraight(10.0, SLOW);
+    marker.write(15);*/
   }
 }
 
@@ -187,14 +201,27 @@ void turnToAngleGyro(double angle) {
 }
 
 // drive straight a certain distance in cm
-void driveStraight(float distance, int motorPower) {
+void driveStraight(float distance, int motorPower, bool draw = true, bool reverse = false) {
   delay(100);
-  marker.write(28);
+
+  if (draw) {
+    marker.write(28);
+  } else {
+    market.write(15);
+  }
+
   long lCount = 0;
   long rCount = 0;
   long targetCount;
   float numRev;
-  double overshoot = 2.54;  // approximate overshoot when driving a specific distance at 100 motorPower
+
+  double overshoot = 2.54;
+
+  if (motorPower == FAST) {  // approximate overshoot when driving a specific distance at these values of motorPower
+    overshoot = 1.54;
+  } else if (motorPower == SLOW) {
+    overshoot = 0.54;
+  }
 
   // variables for tracking the left and right encoder counts
   long prevlCount = 0, prevrCount = 0;
@@ -237,7 +264,12 @@ void driveStraight(float distance, int motorPower) {
   encoder.clearEnc(BOTH);  // clear the encoder count
   delay(200);              // short delay before starting the motors.
 
-  motors.drive(motorPower);  // start motors
+  // start motors
+  if (reverse) {
+    motors.drive(-1 * motorPower);  
+  } else {
+    motors.drive(motorPower)
+  }
 
   while (AVERAGE(rCount, lCount) < targetCount) {
     lCount = encoder.getTicks(LEFT);
@@ -257,8 +289,13 @@ void driveStraight(float distance, int motorPower) {
       Serial.print(targetCount);
       Serial.print("\t");*/
 
-      motors.leftDrive(leftPower);
-      motors.rightDrive(rightPower);
+      if (reverse) {
+        motors.leftDrive(-1 * leftPower);
+        motors.rightDrive(-1 * rightPower);
+      } else {
+        motors.leftDrive(leftPower);
+        motors.rightDrive(rightPower);
+      }
 
       // calculate the rotation "speed" as a difference in the count from previous cycle.
       lDiff = (lCount - prevlCount);
