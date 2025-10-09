@@ -113,8 +113,8 @@ void loop(void) {
     turnToAngleGyro(-120.0);
     driveStraight(3.25, SLOW, false);
     driveStraight(21.5, FAST);
-    driveStraight(9.75, SLOW, false, true)
-      turnToAngleGyro(90.0);
+    driveStraight(9.75, SLOW, false, true);
+    turnToAngleGyro(90.0);
     /*turnToAngleGyro(150.0);
     driveStraight(25.625, FAST);
     turnToAngleGyro(-130.0);
@@ -207,7 +207,7 @@ void driveStraight(float distance, int motorPower, bool draw = true, bool revers
   if (draw) {
     marker.write(28);
   } else {
-    market.write(15);
+    marker.write(15);
   }
 
   long lCount = 0;
@@ -268,7 +268,7 @@ void driveStraight(float distance, int motorPower, bool draw = true, bool revers
   if (reverse) {
     motors.drive(-1 * motorPower);  
   } else {
-    motors.drive(motorPower)
+    motors.drive(motorPower);
   }
 
   while (AVERAGE(rCount, lCount) < targetCount) {
