@@ -7,7 +7,7 @@
 #include <Servo.h>
 #define AVERAGE(a, b) ((a + b) / 2)
 #define ABS(n) ((n < 0) ? n * -1 : n)
-
+//does this work 
 // for use with driveStraight, generally use SLOW for shorter
 // distances (< 20cm) and FAST for longer distances
 #define SLOW 40
