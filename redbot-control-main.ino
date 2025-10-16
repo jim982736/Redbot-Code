@@ -108,23 +108,23 @@ void loop(void) {
     turnToAngleGyro(-30.0);*/
 
     // Zigzag path demo
-    turnToAngleGyro(30.0);
+    /*turnToAngleGyro(30.0);
     driveStraight(15.0, FAST);
     turnToAngleGyro(-120.0);
     driveStraight(3.25, SLOW, false);
     driveStraight(21.5, FAST);
     driveStraight(9.75, SLOW, false, true);
     turnToAngleGyro(90.0);
-    /*turnToAngleGyro(150.0);
+    turnToAngleGyro(150.0);
     driveStraight(25.625, FAST);
     turnToAngleGyro(-130.0);
     driveStraight(39.375, FAST);
     turnToAngleGyro(70.0);*/
 
-    /*driveStraight(45.0, 100);
-    turnToAngleGyro(-90.0);*/
-
-    /*driveStraight(10.0, SLOW);
+    // Zigzag with 90degree angles
+    /*driveStraight(15.0, FAST, false);
+    turnToAngleGyro(135.0);
+    driveStraight(21.2, FAST);
     marker.write(15);*/
   }
 }
@@ -233,7 +233,12 @@ void driveStraight(float distance, int motorPower, bool draw = true, bool revers
   int rightPower = motorPower;
 
   // variable used to offset motor power on right vs left to keep straight.
-  int offset = 5;  // offset amount to compensate Right vs. Left drive
+  int offset;
+  if (!reverse) {
+    offset = 5;
+  } else {
+    offset = 4;
+  }
   double error = 0;
 
   numRev = (distance - overshoot) / wheelCirc;  // calculate the target # of rotations, subtracting overshoot from distance
@@ -266,12 +271,12 @@ void driveStraight(float distance, int motorPower, bool draw = true, bool revers
 
   // start motors
   if (reverse) {
-    motors.drive(-1 * motorPower);  
+    motors.drive(-1 * motorPower);
   } else {
     motors.drive(motorPower);
   }
 
-  while (AVERAGE(rCount, lCount) < targetCount) {
+  while (ABS(AVERAGE(rCount, lCount)) < targetCount) {
     lCount = encoder.getTicks(LEFT);
     rCount = encoder.getTicks(RIGHT);
 
@@ -308,15 +313,25 @@ void driveStraight(float distance, int motorPower, bool draw = true, bool revers
       prevlCount = lCount;
       prevrCount = rCount;
 
-      // if left is faster than the right, slow down the left / speed up right
+      // if left is faster than the right, slow down the left / speed up right, do the opposite if reverse
       if (lDiff > rDiff) {
-        leftPower -= (int)(offset * error);
-        rightPower += (int)(offset * error);
+        if (!reverse) {
+          leftPower -= (int)(offset * error);
+          rightPower += (int)(offset * error);
+        } else {
+          leftPower += (int)(offset * error);
+          rightPower -= (int)(offset * error);
+        }
       }
       // if right is faster than the left, speed up the left / slow down right
       else if (lDiff < rDiff) {
-        leftPower += (int)(offset * error);
-        rightPower -= (int)(offset * error);
+        if (!reverse) {
+          leftPower += (int)(offset * error);
+          rightPower -= (int)(offset * error);
+        } else {
+          leftPower -= (int)(offset * error);
+          rightPower += (int)(offset * error);
+        }
       }
     }
     time = millis() - startTime;
