@@ -1,0 +1,66 @@
+// download SparkFun AS726X library
+#include <Wire.h>
+#include <SparkFun_AS726X.h>
+#include <RedBot.h>
+
+SparkFun_AS726X colorSensor;
+RedBotMotors motors;
+
+#define MOTOR_SPEED 100   // Change speed if needed
+
+// Detect blue line
+bool detectBlue() {
+
+  colorSensor.takeMeasurements();
+
+  float violet = colorSensor.getCalibratedViolet();
+  float blue   = colorSensor.getCalibratedBlue();
+  float green  = colorSensor.getCalibratedGreen();
+  float yellow = colorSensor.getCalibratedYellow();
+  float orange = colorSensor.getCalibratedOrange();
+  float red    = colorSensor.getCalibratedRed();
+
+  float total = violet + blue + green + yellow + orange + red;
+
+  if (total == 0) return false;
+
+  float blueRatio = blue / total;
+
+  Serial.print("Blue Ratio: ");
+  Serial.println(blueRatio);
+
+  // 🔧 Adjust this value after testing
+  if (blue > green && blue > red && blueRatio > 0.35) {
+    return true;
+  }
+
+  return false;
+}
+
+void setup() {
+
+  Serial.begin(9600);
+
+  if (!colorSensor.begin()) {
+    Serial.println("Color sensor not detected.");
+    while (1);
+  }
+
+  colorSensor.setGain(3);
+  colorSensor.setIntegrationTime(50);
+
+  Serial.println("Ready.");
+}
+
+void loop() {
+
+  motors.drive(MOTOR_SPEED);
+
+  if (detectBlue()) {
+    motors.brake();
+    Serial.println("Blue line detected. Stopping.");
+    while (1);   // stop permanently
+  }
+
+  delay(50);
+}
