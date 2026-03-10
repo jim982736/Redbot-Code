@@ -8,8 +8,8 @@ RedBotMotors motors;
 
 #define MOTOR_SPEED 100   // Change speed if needed
 
-// Detect blue line
-bool detectBlue() {
+// Detect green line
+bool detectGreen() {
 
   colorSensor.takeMeasurements();
 
@@ -24,13 +24,13 @@ bool detectBlue() {
 
   if (total == 0) return false;
 
-  float blueRatio = blue / total;
+  float greenRatio = green / total;
 
-  Serial.print("Blue Ratio: ");
-  Serial.println(blueRatio);
+  Serial.print("Green Ratio: ");
+  Serial.println(greenRatio);
 
-  // 🔧 Adjust this value after testing
-  if (blue > green && blue > red && blueRatio > 0.35) {
+  // Adjust this threshold after testing
+  if (green > blue && green > red && green > violet && greenRatio > 0.35) {
     return true;
   }
 
@@ -56,9 +56,9 @@ void loop() {
 
   motors.drive(MOTOR_SPEED);
 
-  if (detectBlue()) {
+  if (detectGreen()) {
     motors.brake();
-    Serial.println("Blue line detected. Stopping.");
+    Serial.println("Green line detected. Stopping.");
     while (1);   // stop permanently
   }
 
