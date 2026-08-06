@@ -1,6 +1,6 @@
 # Redbot-Code
 
-redbot-control-main is the code running on the robot using the redbot mainboard
+redbot-full-control is the code running on the robot using the redbot mainboard
 
 Redbot-Uno-Control is the code running on the robot using the arduino Uno
 
