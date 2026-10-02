@@ -1,3 +1,7 @@
+// Current version of the code running on the robot, essentially it uses a few proportional controllers as well as
+// a PID for turning. There are a few different random build algorithms which have been tested on the robot as well.
+// Currently this code uses ~85% of the Arduino's flash memory
+
 // libraries
 #include <Wire.h>
 #include <Adafruit_Sensor.h>
@@ -180,6 +184,7 @@ void loop(void) {
   }
 }
 
+// Used in debugging to check BNO055 calibration status
 void checkErr() {
   // Check SYS_STAT register
   Wire.beginTransmission(0x28);
@@ -408,6 +413,11 @@ Vector<int> SpeedController(int drive, int lPrev, int rPrev) {
 
 // Uses IMU and encoders to attempt to accurately determine actual location and stay on track better.
 // x and y in inches
+// Estimates the path taken by taking an orientation measurement from the IMU and distance from the encoders every sample, and assuming 
+// that the path between each sample is a straight line. It can be shown that the path taken by a robot like this in the ideal case is 
+// always a circular arc but the straight line assumption was just for the sake of simplicity. 
+// The robot tries to maintain a straight path between the two points by using a proporitional controller to correct for deviation from
+// true, but one of the consequences with this is that over longer distances the robot tends to curve more
 void driveToPoint(double x, double y, int motorPower, bool draw = true) {
   // variables for handling color sensor
   bool rdy = false;
@@ -718,6 +728,7 @@ void UpdatePose(int x, int y) {
   delete[] sensorPose;
 }
 
+// Used to check for disagreement between color sensor readings and current estimated pose
 void EvaluatePose(uint8_t color, bool clear = false) {
   double* sensorPose = GetSensorPose(pose);
   int square[2] = { sensorPose[0] / SIDELEN, sensorPose[1] / SIDELEN };
