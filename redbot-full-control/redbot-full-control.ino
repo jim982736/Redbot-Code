@@ -150,7 +150,7 @@ void setup() {
 void loop(void) {
   // set the power for left & right motors on button press
   if (digitalRead(buttonPin) == LOW) {
-    RandomBuild2(5.0, 5, 7);
+    // RandomBuild2(5.0, 5, 7);
     // marker.write(45);
     // delay(1000);
     // marker.write(0);
@@ -173,7 +173,7 @@ void loop(void) {
     driveToPoint(21.2, FAST);
     marker.write(15);*/
 
-    // start = true;
+    start = true;
   }
   if (start) {
     RandomBuild2(5.0, 5, 7);
@@ -773,8 +773,8 @@ void EvaluatePose(uint8_t color, bool clear = false) {
           break;
         default:
           break;
-        
-        matches[i] = 0;
+
+          matches[i] = 0;
       }
       break;
     } else {
@@ -957,6 +957,84 @@ void RandomBuild2(double sideLength, int width, int height) {
       yEnd = scale(yStart, yEnd, 2);
     } while (yEnd == yStart);  // prevent random from starting and ending at the same point
   }
+
+  Serial.print("Start Point: (");
+  Serial.print(xStart);
+  Serial.print(", ");
+  Serial.print(yStart);
+  Serial.println(")");
+
+  Serial.print("End Point: (");
+  Serial.print(xEnd);
+  Serial.print(", ");
+  Serial.print(yEnd);
+  Serial.println(")\n");
+
+  if (sqrt(pow(pose[0] - (xStart * SIDELEN), 2) + pow(pose[1] - (yStart * SIDELEN), 2)) > (SIDELEN * 0.15)) {
+    // recenter if far from center of square
+    driveToPoint(xStart * sideLength, yStart * sideLength, SLOW, false);
+    delay(200);
+  }
+  driveToPoint(xEnd * sideLength, yEnd * sideLength, SLOW, true);
+  delay(200);
+}
+
+// Version of RandomBuild2 where ALN only turns right or straight
+void RandomBuild3(double sideLength, int width, int height) {
+  int xStart = 0;
+  int yStart = 0;
+
+  static int prevDir = -1;
+  if (prevDir == -1) {
+    prevDir = random(0, 4);
+  }
+
+  if (pose[0] > 0.0) {
+    xStart = (int)((pose[0] + (SIDELEN / 2.0)) / SIDELEN);
+  } else {
+    xStart = (int)((pose[0] - (SIDELEN / 2.0)) / SIDELEN);
+  }
+  if (pose[1] > 0.0) {
+    yStart = (int)((pose[1] + (SIDELEN / 2.0)) / SIDELEN);
+  } else {
+    yStart = (int)((pose[1] - (SIDELEN / 2.0)) / SIDELEN);
+  }
+
+  int xEnd = 0;
+  int yEnd = 0;
+  bool turn;
+  int moveDir;
+
+  do {
+    turn = random(0, 2);
+    moveDir = (prevDir + turn) % 4;
+
+    switch (moveDir) {
+      case 0:
+        xEnd = xStart;
+        yEnd = random(yStart + 1, yStart + 3);
+        break;
+      case 1:
+        xEnd = random(xStart + 1, xStart + 3);
+        yEnd = yStart;
+        break;
+      case 2:
+        xEnd = xStart;
+        yEnd = random(yStart - 2, yStart);
+        break;
+      case 3:
+        xEnd = random(xStart - 2, xStart);
+        yEnd = yStart;
+        break;
+      default:
+        break;
+    }
+    prevDir = moveDir;
+
+    xEnd = constrain(xEnd, -1 * (width / 2), (width / 2));
+    yEnd = constrain(yEnd, -1 * (height / 2), (height / 2));
+  } while (xEnd == xStart && yEnd == yStart);
+
 
   Serial.print("Start Point: (");
   Serial.print(xStart);
